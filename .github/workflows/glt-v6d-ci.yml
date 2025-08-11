@@ -24,7 +24,7 @@ env:
 jobs:
   run-glt-v6d-unittests:
     runs-on: self-hosted
-    if: ${{ github.repository == 'alibaba/graphlearn-for-pytorch' }}
+    if: ${{ github.repository == 'snapchat/graphlearn-for-pytorch' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
