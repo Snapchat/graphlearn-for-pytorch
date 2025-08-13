@@ -23,6 +23,9 @@ from dist_test_utils import *
 from dist_test_utils import _prepare_dataset, _prepare_hetero_dataset
 from parameterized import parameterized
 
+
+device_num = 1
+
 def _check_sample_result(data, edge_dir='out'):
   tc = unittest.TestCase()
 
@@ -221,7 +224,7 @@ def run_test_as_worker(world_size: int, rank: int,
   else:
     worker_options = glt.distributed.MpDistSamplingWorkerOptions(
       num_workers=sampling_nprocs,
-      worker_devices=[torch.device('cuda', i % device_num)
+      worker_devices=[torch.device('cuda', 0)
                       for i in range(sampling_nprocs)],
       worker_concurrency=2,
       master_addr='localhost',
@@ -241,7 +244,7 @@ def run_test_as_worker(world_size: int, rank: int,
     with_edge=True,
     edge_dir=edge_dir,
     collect_features=True,
-    to_device=torch.device('cuda', rank % device_num),
+    to_device=torch.device('cuda', 0),
     worker_options=worker_options
   )
 
@@ -297,7 +300,7 @@ def run_test_as_client(num_servers: int, num_clients: int, client_rank: int,
     options = glt.distributed.RemoteDistSamplingWorkerOptions(
       server_rank=target_server_rank,
       num_workers=sampling_nprocs,
-      worker_devices=[torch.device('cuda', i % device_num)
+      worker_devices=[torch.device('cuda', 0)
                       for i in range(sampling_nprocs)],
       worker_concurrency=2,
       master_addr='localhost',
@@ -317,7 +320,7 @@ def run_test_as_client(num_servers: int, num_clients: int, client_rank: int,
       with_edge=True,
       edge_dir='out',
       collect_features=True,
-      to_device=torch.device('cuda', client_rank % device_num),
+      to_device=torch.device('cuda', 0),
       worker_options=options
     )
 

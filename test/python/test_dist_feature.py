@@ -27,7 +27,7 @@ def run_dist_feature_test(world_size: int, rank: int, feature: glt.data.Feature,
   partition2workers = glt.distributed.rpc_sync_data_partitions(world_size, rank)
   rpc_router = glt.distributed.RpcDataPartitionRouter(partition2workers)
 
-  current_device = torch.device('cuda', rank % 2)
+  current_device = torch.device('cuda', 0)
 
   dist_feature = glt.distributed.DistFeature(
     world_size, rank, feature, partition_book,
@@ -74,9 +74,15 @@ class DistFeatureTestCase(unittest.TestCase):
     ])
     partition_book.share_memory_()
 
+    # device_group_list = [
+    #   glt.data.DeviceGroup(0, [0]),
+    #   glt.data.DeviceGroup(1, [1])
+    # ]
+    # TODO(kmonte): Swap back to using real device_group_list when we have
+    # a way to run tests on multiple GPUs.
+    device_group_list = None
     device_group_list = [
       glt.data.DeviceGroup(0, [0]),
-      glt.data.DeviceGroup(1, [1])
     ]
 
     split_ratio = 0.8
