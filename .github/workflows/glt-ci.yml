@@ -98,3 +98,7 @@ jobs:
         with:
           machine_name: ${{ env.MACHINE_NAME }}
           zone: ${{ env.gcp_zone }}
+          project: ${{ env.PROJECT }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp_service_account_email: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}

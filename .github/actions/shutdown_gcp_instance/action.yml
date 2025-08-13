@@ -14,17 +14,22 @@ inputs:
   service_account:
     description: The service account to use for the shutdown
     required: true
+  workload_identity_provider:
+    description: The workload identity provider to use for the shutdown
+    required: true
 
 runs:
   using: 'composite'
   steps:
     - name: Setup GCloud
       uses: ./.github/actions/setup_gcloud
+      shell: bash
       with:
         gcp_project_id: ${{ inputs.project }}
-        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
         gcp_service_account_email: ${{ inputs.service_account }}
 
     - name: Shutdown Instance
+      shell: bash
       run: |
         gcloud compute instances delete ${inputs.machine_name} --zone=${inputs.zone}

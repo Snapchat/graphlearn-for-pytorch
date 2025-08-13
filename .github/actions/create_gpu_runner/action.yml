@@ -79,6 +79,6 @@ runs:
         ./config.sh --url ${{ github.repository }} --token ${{ inputs.gpu_runner_token }}
 
     - name: Run the runner
-      
+      shell: bash
       run: |
         ./run.sh
