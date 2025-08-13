@@ -16,3 +16,7 @@ detect_cuda_*
 cmake-build-release/
 cmake-build-debug/
 /graphlearn_torch/python/*.so
+
+gha-creds-*.json
+
+.DS_Store

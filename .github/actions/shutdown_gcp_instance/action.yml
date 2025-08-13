@@ -1,0 +1,17 @@
+name: Shutdown GCP Instance
+description: Shutdown a GCP instance
+
+inputs:
+  machine_name:
+    description: The name of the machine to shutdown
+    required: true
+  zone:
+    description: The zone of the machine to shutdown
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Shutdown Instance
+      run: |
+        gcloud compute instances delete ${inputs.machine_name} --zone=${inputs.zone}

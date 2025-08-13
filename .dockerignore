@@ -1,0 +1,10 @@
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.git
+**/.mypy_cache
+**/*.pkl
+
+# https://github.com/google-github-actions/auth/issues/497
+gha-creds-*.json

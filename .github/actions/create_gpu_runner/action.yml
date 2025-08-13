@@ -1,0 +1,70 @@
+name: Create GPU Runner
+description: Create a GPU runner for the GLT CI
+
+inputs:
+  project:
+    description: The project to create the runner in
+    required: true
+  zone:
+    description: The zone to create the runner in
+    required: true
+  service_account:
+    description: The service account to use for the runner
+    required: true
+  machine_name:
+    description: The name of the machine to create
+    required: true
+  machine_type:
+    description: The type of machine to create
+    default: n1-standard-4
+  accelerator_type:
+    description: The type of accelerator to create
+    default: nvidia-tesla-p4
+  accelerator_count:
+    description: The number of accelerators to create
+    default: 1
+  disk_size:
+    description: The size of the disk to create
+    default: 100
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup GCloud
+      uses: ./.github/actions/setup_gcloud
+      with:
+        gcp_project_id: ${{ inputs.project }}
+        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        gcp_service_account_email: ${{ inputs.service_account }}
+    - name: Start Runner
+      run: |
+        python <(curl -s https://raw.githubusercontent.com/Snapchat/GiGL/refs/heads/main/scripts/create_dev_instance.py) \
+        --project=${{ inputs.project }} \
+        --zone=${{ inputs.zone }} \
+        --service-account=${{ inputs.service_account }} \
+        --machine_name=${{ inputs.machine_name }} \
+        --machine_type=${{ inputs.machine_type }} \
+        --accelerator_type=${{ inputs.accelerator_type }} \
+        --accelerator_count=${{ inputs.accelerator_count }} \
+        --disk_size=${{ inputs.disk_size }}
+
+    - name: Wait for Runner to be ready
+      run: |
+        while ! gcloud compute instances describe ${MACHINE_NAME} --format='get(status)' | grep -q "RUNNING"; do
+    
+    - name: Setup Runner
+      run: |
+        # Create a folder
+        mkdir actions-runner && cd actions-runner
+        # Download the latest runner package
+        curl -o actions-runner-linux-x64-2.327.1.tar.gz -L https://github.com/actions/runner/releases/download/v2.327.1/actions-runner-linux-x64-2.327.1.tar.gz
+        # Optional: Validate the hash
+        echo "d68ac1f500b747d1271d9e52661c408d56cffd226974f68b7dc813e30b9e0575  actions-runner-linux-x64-2.327.1.tar.gz" | shasum -a 256 -c
+        # Extract the installer
+        tar xzf ./actions-runner-linux-x64-2.327.1.tar.gz
+
+        ./config.sh --url ${{ github.repository }} --token ${{ secrets.GPU_RUNNER_TOKEN }}
+
+    - name: Run the runner
+      run: |
+        ./run.sh

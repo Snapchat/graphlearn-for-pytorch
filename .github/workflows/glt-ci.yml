@@ -20,12 +20,32 @@ env:
   IMAGE: graphlearn-torch-dev
   JOBNAME: glt-ci-${{ github.run_id }}
   DESTDIR: /mnt/graphlearn_for_pytorch
+  MACHINE_NAME: glt-gpu-unittests-${{ github.run_id }}
+  gcp_zone: us-central1-b
+  PROJECT: external-snap-ci-github-gigl
 
 jobs:
+  create-gpu-runner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GPU Runner
+        uses: ./.github/actions/create_gpu_runner
+        with:
+          project: ${{ env.PROJECT }}
+          zone: ${{ env.gcp_zone }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+          machine_name: ${{ env.MACHINE_NAME }}
+          machine_type: n1-standard-4
+          accelerator_type: nvidia-tesla-p4
+          accelerator_count: 1
+
+
   run-glt-unittests:
+    needs: create-gpu-runner
     runs-on: self-hosted
     if: ${{ github.repository == 'snapchat/graphlearn-for-pytorch' }}
     steps:
+
       - name: Checkout Code
         uses: actions/checkout@v3
 
@@ -61,3 +81,13 @@ jobs:
         working-directory: ${{github.workspace}}
         run: |
           bash scripts/remove_container.sh ${JOBNAME}
+  
+  shutdown_gpu_runner:
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Shutdown GPU Runner
+        uses: ./.github/actions/shutdown_gcp_instance
+        with:
+          machine_name: ${{ env.MACHINE_NAME }}
+          zone: ${{ env.gcp_zone }}

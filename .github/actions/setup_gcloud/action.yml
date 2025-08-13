@@ -1,0 +1,36 @@
+name: Setup GCloud
+description: Setup GCloud
+
+inputs:
+  gcp_project_id:
+    description: The GCP project ID
+    required: true
+  workload_identity_provider:
+    description: The workload identity provider
+    required: true
+  gcp_service_account_email:
+    description: The GCP service account email
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+      # Step 1: Set up Gcloud AUTH using Workload Identity Federation
+      # See following for context: https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
+      - name: Google Cloud Auth
+        # NOTE: If upgrading, please ensure that the generated
+        # credentials file is gitignored/ docker ignored: `gha-creds-*.json`
+        # More info: https://github.com/google-github-actions/auth/issues/123
+        uses: 'google-github-actions/auth@v2' # WARNING: See note above.
+        with:
+          project_id: ${{ inputs.gcp_project_id }}
+          workload_identity_provider: ${{ inputs.workload_identity_provider }}
+          service_account: ${{ inputs.gcp_service_account_email }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      # Step 4: Install gcloud tooling
+      - name: Set Up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ inputs.gcp_project_id }}
