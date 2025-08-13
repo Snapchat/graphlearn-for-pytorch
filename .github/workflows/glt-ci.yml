@@ -92,6 +92,7 @@ jobs:
           bash scripts/remove_container.sh ${JOBNAME}
   
   shutdown_gpu_runner:
+    needs: run-glt-unittests
     if: always()
     runs-on: ubuntu-latest
     steps:
