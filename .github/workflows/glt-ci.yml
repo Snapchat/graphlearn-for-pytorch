@@ -41,7 +41,7 @@ jobs:
           accelerator_type: nvidia-tesla-p4
           accelerator_count: 1
           gpu_runner_token: ${{ secrets.GPU_RUNNER_TOKEN }}
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           gcp_service_account_email: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
 
 
@@ -100,5 +100,5 @@ jobs:
           zone: ${{ env.gcp_zone }}
           project: ${{ env.PROJECT }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           gcp_service_account_email: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}

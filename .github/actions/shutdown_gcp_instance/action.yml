@@ -23,7 +23,6 @@ runs:
   steps:
     - name: Setup GCloud
       uses: ./.github/actions/setup_gcloud
-      shell: bash
       with:
         gcp_project_id: ${{ inputs.project }}
         workload_identity_provider: ${{ inputs.workload_identity_provider }}
