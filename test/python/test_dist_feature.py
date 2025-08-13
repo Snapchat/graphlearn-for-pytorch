@@ -27,7 +27,7 @@ def run_dist_feature_test(world_size: int, rank: int, feature: glt.data.Feature,
   partition2workers = glt.distributed.rpc_sync_data_partitions(world_size, rank)
   rpc_router = glt.distributed.RpcDataPartitionRouter(partition2workers)
 
-  current_device = torch.device('cuda', rank % 2)
+  current_device = torch.device('cuda', rank % torch.cuda.device_count())
 
   dist_feature = glt.distributed.DistFeature(
     world_size, rank, feature, partition_book,
