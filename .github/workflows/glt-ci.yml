@@ -16,15 +16,44 @@ on:
       - 'examples/**'
       - '**.md'
 
+permissions:
+  # Needed for gcloud auth: https://github.com/google-github-actions/auth
+  id-token: 'write'
+  contents: 'read'
+
 env:
   IMAGE: graphlearn-torch-dev
   JOBNAME: glt-ci-${{ github.run_id }}
   DESTDIR: /mnt/graphlearn_for_pytorch
+  MACHINE_NAME: glt-gpu-unittests-${{ github.run_id }}
+  gcp_zone: us-central1-b
+  PROJECT: external-snap-ci-github-gigl
 
 jobs:
+  create-gpu-runner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Create GPU Runner
+        uses: ./.github/actions/create_gpu_runner
+        with:
+          project: ${{ env.PROJECT }}
+          zone: ${{ env.gcp_zone }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+          machine_name: ${{ env.MACHINE_NAME }}
+          machine_type: n1-standard-4
+          accelerator_type: nvidia-tesla-p4
+          accelerator_count: 1
+          gpu_runner_token: ${{ secrets.GPU_RUNNER_TOKEN }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          gcp_service_account_email: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+
   run-glt-unittests:
+    needs: create-gpu-runner
     runs-on: self-hosted
-    if: ${{ github.repository == 'alibaba/graphlearn-for-pytorch' }}
+    if: ${{ github.repository == 'snapchat/graphlearn-for-pytorch' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -61,3 +90,21 @@ jobs:
         working-directory: ${{github.workspace}}
         run: |
           bash scripts/remove_container.sh ${JOBNAME}
+  
+  shutdown_gpu_runner:
+    needs: run-glt-unittests
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Shutdown GPU Runner
+        uses: ./.github/actions/shutdown_gcp_instance
+        with:
+          machine_name: ${{ env.MACHINE_NAME }}
+          zone: ${{ env.gcp_zone }}
+          project: ${{ env.PROJECT }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          gcp_service_account_email: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}

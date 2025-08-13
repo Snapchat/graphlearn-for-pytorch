@@ -1,0 +1,44 @@
+name: Setup GCloud
+description: Setup GCloud
+
+inputs:
+  gcp_project_id:
+    description: The GCP project ID
+    required: true
+  workload_identity_provider:
+    description: The workload identity provider
+    required: true
+  gcp_service_account_email:
+    description: The GCP service account email
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+      # Step 1: Set up Python environment (Python 3.9.13).
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          # Available versions: https://raw.githubusercontent.com/actions/python-versions/main/versions-manifest.json
+          # Ensure to use a version that has support for arm64-darwin so we can build for Apple Silicon (macOS 14).
+          python-version: '3.9.13'
+
+      # Step 2: Set up Gcloud AUTH using Workload Identity Federation
+      # See following for context: https://cloud.google.com/blog/products/identity-security/enabling-keyless-authentication-from-github-actions
+      - name: Google Cloud Auth
+        # NOTE: If upgrading, please ensure that the generated
+        # credentials file is gitignored/ docker ignored: `gha-creds-*.json`
+        # More info: https://github.com/google-github-actions/auth/issues/123
+        uses: 'google-github-actions/auth@v2' # WARNING: See note above.
+        with:
+          project_id: ${{ inputs.gcp_project_id }}
+          workload_identity_provider: ${{ inputs.workload_identity_provider }}
+          service_account: ${{ inputs.gcp_service_account_email }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      # Step 3: Install gcloud tooling
+      - name: Set Up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ inputs.gcp_project_id }}

@@ -12,8 +12,8 @@ env:
 
 jobs:
   build:
-    runs-on: self-hosted
-    if: ${{ github.repository == 'alibaba/graphlearn-for-pytorch' }}
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'snapchat/graphlearn-for-pytorch' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
