@@ -8,10 +8,23 @@ inputs:
   zone:
     description: The zone of the machine to shutdown
     required: true
+  project:
+    description: The project to shutdown the machine in
+    required: true
+  service_account:
+    description: The service account to use for the shutdown
+    required: true
 
 runs:
   using: 'composite'
   steps:
+    - name: Setup GCloud
+      uses: ./.github/actions/setup_gcloud
+      with:
+        gcp_project_id: ${{ inputs.project }}
+        workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        gcp_service_account_email: ${{ inputs.service_account }}
+
     - name: Shutdown Instance
       run: |
         gcloud compute instances delete ${inputs.machine_name} --zone=${inputs.zone}
