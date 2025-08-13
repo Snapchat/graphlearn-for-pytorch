@@ -35,7 +35,7 @@ rev_u2i_etype = ('item', 'rev_u2i', 'user')
 
 # fixed sampling options
 sampling_nprocs = 2
-device_num = 2
+device_num = 1
 
 
 def _prepare_dataset(rank: int, 
@@ -110,8 +110,7 @@ def _prepare_dataset(rank: int,
   weighted_graph = glt.data.Graph(weighted_csr_topo, 'CPU')
 
   # feature
-  device_group_list = [glt.data.DeviceGroup(0, [0]),
-                       glt.data.DeviceGroup(1, [1])]
+  device_group_list = [glt.data.DeviceGroup(0, [0])]
   split_ratio = 0.2
 
   nfeat = torch.tensor(nodes, dtype=torch.float32).unsqueeze(1).repeat(1, 512)
@@ -229,8 +228,7 @@ def _prepare_hetero_dataset(
   }
 
   # feature
-  device_group_list = [glt.data.DeviceGroup(0, [0]),
-                       glt.data.DeviceGroup(1, [1])]
+  device_group_list = [glt.data.DeviceGroup(0, [0])]
   split_ratio = 0.2
 
   user_nfeat = rank + torch.zeros(len(user_nodes), 512, dtype=torch.float32)

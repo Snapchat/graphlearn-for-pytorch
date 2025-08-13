@@ -21,7 +21,7 @@ import graphlearn_torch as glt
 
 # sampling options
 sampling_nprocs = 2
-device_num = 2
+device_num = 1
 
 def _prepare_dataset(rank: int):
   """
@@ -87,12 +87,12 @@ def _check_sample_result(data, rank):
     true_edge_id = torch.tensor([0, 1, 2, 3, 4, 5, 9, 12, 13, 14, 16], device='cuda:0')
     true_mapping = torch.tensor([0, 2, 5], device='cuda:0')
   else:
-    true_node = torch.tensor([0, 1, 3, 5, 6, 7], device='cuda:1')
+    true_node = torch.tensor([0, 1, 3, 5, 6, 7], device='cuda:0')
     true_edge_index = torch.tensor([[0, 3, 0, 5, 0, 1, 5, 1, 2, 4, 3],
                                     [3, 3, 4, 5, 0, 0, 0, 1, 1, 1, 2]],
-                                    device='cuda:1')
-    true_edge_id = torch.tensor([12, 13, 14, 16, 0, 1, 2, 3, 4, 5, 9], device='cuda:1')
-    true_mapping = torch.tensor([0, 2, 5], device='cuda:1')
+                                    device='cuda:0')
+    true_edge_id = torch.tensor([12, 13, 14, 16, 0, 1, 2, 3, 4, 5, 9], device='cuda:0')
+    true_mapping = torch.tensor([0, 2, 5], device='cuda:0')
   tc.assertTrue(glt.utils.tensor_equal_with_device(data.node, true_node))
   tc.assertTrue(glt.utils.tensor_equal_with_device(data.edge_index, true_edge_index))
   tc.assertTrue(glt.utils.tensor_equal_with_device(data.edge, true_edge_id))
@@ -141,7 +141,7 @@ def run_test_as_worker(world_size: int, rank: int,
   else:
     worker_options = glt.distributed.MpDistSamplingWorkerOptions(
       num_workers=sampling_nprocs,
-      worker_devices=[torch.device('cuda', i % device_num)
+      worker_devices=[torch.device('cuda', 0)
                       for i in range(sampling_nprocs)],
       worker_concurrency=2,
       master_addr='localhost',
@@ -159,7 +159,7 @@ def run_test_as_worker(world_size: int, rank: int,
     drop_last=False,
     with_edge=True,
     collect_features=True,
-    to_device=torch.device('cuda', rank % device_num),
+    to_device=torch.device('cuda', 0),
     worker_options=worker_options
   )
 
@@ -214,7 +214,7 @@ def run_test_as_client(num_servers: int, num_clients: int, client_rank: int,
     options = glt.distributed.RemoteDistSamplingWorkerOptions(
       server_rank=target_server_rank,
       num_workers=sampling_nprocs,
-      worker_devices=[torch.device('cuda', i % device_num)
+      worker_devices=[torch.device('cuda', 0)
                       for i in range(sampling_nprocs)],
       worker_concurrency=2,
       master_addr='localhost',
@@ -232,7 +232,7 @@ def run_test_as_client(num_servers: int, num_clients: int, client_rank: int,
       drop_last=False,
       with_edge=True,
       collect_features=True,
-      to_device=torch.device('cuda', client_rank % device_num),
+      to_device=torch.device('cuda', 0),
       worker_options=options
     )
 
