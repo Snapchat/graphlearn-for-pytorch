@@ -25,6 +25,12 @@ env:
   PROJECT: external-snap-ci-github-gigl
 
 jobs:
+  checkout-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
   create-gpu-runner:
     runs-on: ubuntu-latest
     steps:
@@ -45,9 +51,6 @@ jobs:
     runs-on: self-hosted
     if: ${{ github.repository == 'snapchat/graphlearn-for-pytorch' }}
     steps:
-
-      - name: Checkout Code
-        uses: actions/checkout@v3
 
       - name: Update submodules
         working-directory: ${{github.workspace}}
