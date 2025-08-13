@@ -16,6 +16,11 @@ on:
       - 'examples/**'
       - '**.md'
 
+permissions:
+  # Needed for gcloud auth: https://github.com/google-github-actions/auth
+  id-token: 'write'
+  contents: 'read'
+
 env:
   IMAGE: graphlearn-torch-dev
   JOBNAME: glt-ci-${{ github.run_id }}
